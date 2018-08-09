@@ -19,10 +19,7 @@ namespace TraderAI
     {
         WebClient webConnector;
         const string googleAddress =
-            "http://www.google.com/finance/historical?q=[-|ticker|-]&startdate=[-|sdate|-]&enddate=[-|edate|-]&num=30&output=csv";
-
-        const string yahooAddress =
-            "http://real-chart.finance.yahoo.com/table.csv?s=[-|ticker|-]&[-|sdate|-]&[-|edate|-]&g=d&ignore=.csv";
+            "http://www.google.com/finance/historical?q=[-|ticker|-]&startdate=[-|sdate|-]&enddate=[-|edate|-]&output=csv";
 
         public Dictionary<DateTime, StockDataItem> getStockDataFromGoogle(string market, string ticker, DateTime startDate, DateTime endDate)
         {
@@ -36,31 +33,6 @@ namespace TraderAI
             string constructedStartDate = startDate.ToString("MMM") + "+" + startDate.Day.ToString() + "%2C+" + startDate.ToString("yyyy");
             string constructedEndDate = endDate.ToString("MMM") + "+" + endDate.Day.ToString() + "%2C+" + endDate.ToString("yyyy");
             constructedUri = constructedUri.Replace("[-|sdate|-]", constructedStartDate);
-            constructedUri = constructedUri.Replace("[-|edate|-]", constructedEndDate);
-
-            return constructedUri;
-        }
-
-        public Dictionary<DateTime, StockDataItem> getStockDataFromYahoo(string ticker, DateTime startDate, DateTime endDate)
-        {
-            return fillDataDictionary(getData(constructYahooLink(ticker, startDate, endDate)));
-        }
-
-        string constructYahooLink(string ticker, DateTime startDate, DateTime endDate)
-        {
-            string constructedUri = yahooAddress;
-            constructedUri = constructedUri.Replace("[-|ticker|-]", ticker);
-            string constructedStartDate =
-                "a=" + (startDate.Month - 1).ToString() +
-                "&b=" + startDate.Day.ToString() +
-                "&c=" + startDate.Year.ToString();
-            string constructedEndDate =
-                "d=" + (endDate.Month - 1).ToString() +
-                "&e=" + endDate.Day.ToString() +
-                "&f=" + endDate.Year.ToString();
-
-            constructedUri = constructedUri.Replace("[-|sdate|-]", constructedStartDate);
-
             constructedUri = constructedUri.Replace("[-|edate|-]", constructedEndDate);
 
             return constructedUri;

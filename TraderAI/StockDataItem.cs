@@ -14,14 +14,14 @@ namespace TraderAI
      */
     public class StockDataItem
     {
-        public double open = 0;
+        public float open = 0;
 
-        public double high = 0;
+        public float high = 0;
 
-        public double low = 0;
+        public float low = 0;
 
-        public double close = 0;
+        public float close = 0;
 
-        public double volume = 0;
+        public float volume = 0;
     }
 }

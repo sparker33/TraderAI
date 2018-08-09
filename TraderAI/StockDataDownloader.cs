@@ -26,6 +26,43 @@ namespace TraderAI
         // pulls data from google
         public StockDataDownloader(string fileName, int exchangesHeaderIndex, int tickersHeaderIndex, DateTime startDate, DateTime endDate)
         {
+
+            // Temporary placeholder to populate some stock data to work with (delete once auto scan is fixed)
+            tickerSymbols.Add("AMD");
+            tickerSymbols.Add("TUP");
+
+            Dictionary<DateTime, StockDataItem> amdDict = new Dictionary<DateTime, StockDataItem>();
+            string[] amdLines = Properties.Resources.AMD.Split('\n');
+            for (int i = 1; i < amdLines.Length - 1; i++)
+            {
+                string[] values = amdLines[i].Split(',');
+                StockDataItem stockDataItem = new StockDataItem();
+                stockDataItem.close = Single.Parse(values[6]);
+                stockDataItem.low = Single.Parse(values[4]);
+                stockDataItem.high = Single.Parse(values[3]);
+                stockDataItem.open = Single.Parse(values[2]);
+                stockDataItem.volume = Single.Parse(values[7]);
+                amdDict.Add(DateTime.Parse(values[0]), stockDataItem);
+            }
+            stockDataDictionaries.Add(amdDict);
+
+            Dictionary<DateTime, StockDataItem> tupDict = new Dictionary<DateTime, StockDataItem>();
+            string[] tupLines = Properties.Resources.TUP.Split('\n');
+            for (int i = 1; i < tupLines.Length - 1; i++)
+            {
+                string[] values = tupLines[i].Split(',');
+                StockDataItem stockDataItem = new StockDataItem();
+                stockDataItem.close = Single.Parse(values[6]);
+                stockDataItem.low = Single.Parse(values[4]);
+                stockDataItem.high = Single.Parse(values[3]);
+                stockDataItem.open = Single.Parse(values[2]);
+                stockDataItem.volume = Single.Parse(values[7]);
+                tupDict.Add(DateTime.Parse(values[0]), stockDataItem);
+            }
+            stockDataDictionaries.Add(tupDict);
+            /*
+            This portion commented out until web-based stock data retrieval service is fixed 
+
             // Retrieve data
             WebClientForStockFinanceHistory downloaderClient = new WebClientForStockFinanceHistory();
             using (FileStream stream = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
@@ -44,12 +81,14 @@ namespace TraderAI
                 }
             }
 
+            */
+
             // Populate orderedDates
             DateTime dt = startDate;
             while (dt <= endDate)
             {
                 orderedDates.Add(dt);
-                dt = dt.AddDays(1);
+                dt = dt.AddDays(7);
             }
         }
         

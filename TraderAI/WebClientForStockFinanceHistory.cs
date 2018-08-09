@@ -78,37 +78,37 @@ namespace TraderAI
                     {
                         StockDataItem newItem = new StockDataItem();
 
-                        double tempOpen;
+                        float tempOpen;
 
-                        if (Double.TryParse(splitLine[1], out tempOpen))
+                        if (Single.TryParse(splitLine[1], out tempOpen))
                         {
                             newItem.open = tempOpen;
                         }
 
-                        double tempHigh;
+                        float tempHigh;
 
-                        if (Double.TryParse(splitLine[2], out tempHigh))
+                        if (Single.TryParse(splitLine[2], out tempHigh))
                         {
                             newItem.high = tempHigh;
                         }
 
-                        double tempLow;
+                        float tempLow;
 
-                        if (Double.TryParse(splitLine[3], out tempLow))
+                        if (Single.TryParse(splitLine[3], out tempLow))
                         {
                             newItem.low = tempLow;
                         }
 
-                        double tempClose;
+                        float tempClose;
 
-                        if (Double.TryParse(splitLine[4], out tempClose))
+                        if (Single.TryParse(splitLine[4], out tempClose))
                         {
                             newItem.close = tempClose;
                         }
 
-                        double tempVolume;
+                        float tempVolume;
 
-                        if (Double.TryParse(splitLine[5], out tempVolume))
+                        if (Single.TryParse(splitLine[5], out tempVolume))
                         {
                             newItem.volume = tempVolume;
                         }

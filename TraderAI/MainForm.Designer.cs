@@ -41,6 +41,14 @@
             this.endDatePicker = new System.Windows.Forms.DateTimePicker();
             this.downloadButton = new System.Windows.Forms.Button();
             this.runButton = new System.Windows.Forms.Button();
+            this.genSizeLabel = new System.Windows.Forms.Label();
+            this.genCountLabel = new System.Windows.Forms.Label();
+            this.mutationLabel = new System.Windows.Forms.Label();
+            this.genSizeBox = new System.Windows.Forms.TextBox();
+            this.genCountBox = new System.Windows.Forms.TextBox();
+            this.mutationRateBox = new System.Windows.Forms.TextBox();
+            this.tradeFeeBox = new System.Windows.Forms.TextBox();
+            this.tradeFeeLabel = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // tickerListInputLabel
@@ -143,7 +151,7 @@
             // downloadButton
             // 
             this.downloadButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.downloadButton.Location = new System.Drawing.Point(12, 280);
+            this.downloadButton.Location = new System.Drawing.Point(12, 354);
             this.downloadButton.Name = "downloadButton";
             this.downloadButton.Size = new System.Drawing.Size(94, 23);
             this.downloadButton.TabIndex = 12;
@@ -154,7 +162,7 @@
             // runButton
             // 
             this.runButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.runButton.Location = new System.Drawing.Point(112, 280);
+            this.runButton.Location = new System.Drawing.Point(112, 354);
             this.runButton.Name = "runButton";
             this.runButton.Size = new System.Drawing.Size(94, 23);
             this.runButton.TabIndex = 13;
@@ -162,11 +170,91 @@
             this.runButton.UseVisualStyleBackColor = true;
             this.runButton.Click += new System.EventHandler(this.runButton_Click);
             // 
+            // genSizeLabel
+            // 
+            this.genSizeLabel.AutoSize = true;
+            this.genSizeLabel.Location = new System.Drawing.Point(12, 221);
+            this.genSizeLabel.Name = "genSizeLabel";
+            this.genSizeLabel.Size = new System.Drawing.Size(85, 13);
+            this.genSizeLabel.TabIndex = 14;
+            this.genSizeLabel.Text = "Generation Size:";
+            // 
+            // genCountLabel
+            // 
+            this.genCountLabel.AutoSize = true;
+            this.genCountLabel.Location = new System.Drawing.Point(12, 247);
+            this.genCountLabel.Name = "genCountLabel";
+            this.genCountLabel.Size = new System.Drawing.Size(93, 13);
+            this.genCountLabel.TabIndex = 15;
+            this.genCountLabel.Text = "Generation Count:";
+            // 
+            // mutationLabel
+            // 
+            this.mutationLabel.AutoSize = true;
+            this.mutationLabel.Location = new System.Drawing.Point(12, 273);
+            this.mutationLabel.Name = "mutationLabel";
+            this.mutationLabel.Size = new System.Drawing.Size(77, 13);
+            this.mutationLabel.TabIndex = 16;
+            this.mutationLabel.Text = "Mutation Rate:";
+            // 
+            // genSizeBox
+            // 
+            this.genSizeBox.Location = new System.Drawing.Point(112, 218);
+            this.genSizeBox.Name = "genSizeBox";
+            this.genSizeBox.Size = new System.Drawing.Size(62, 20);
+            this.genSizeBox.TabIndex = 17;
+            this.genSizeBox.Text = "1000";
+            this.genSizeBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // genCountBox
+            // 
+            this.genCountBox.Location = new System.Drawing.Point(112, 244);
+            this.genCountBox.Name = "genCountBox";
+            this.genCountBox.Size = new System.Drawing.Size(62, 20);
+            this.genCountBox.TabIndex = 18;
+            this.genCountBox.Text = "750";
+            this.genCountBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // mutationRateBox
+            // 
+            this.mutationRateBox.Location = new System.Drawing.Point(112, 270);
+            this.mutationRateBox.Name = "mutationRateBox";
+            this.mutationRateBox.Size = new System.Drawing.Size(62, 20);
+            this.mutationRateBox.TabIndex = 19;
+            this.mutationRateBox.Text = "0.01";
+            this.mutationRateBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // tradeFeeBox
+            // 
+            this.tradeFeeBox.Location = new System.Drawing.Point(112, 296);
+            this.tradeFeeBox.Name = "tradeFeeBox";
+            this.tradeFeeBox.Size = new System.Drawing.Size(62, 20);
+            this.tradeFeeBox.TabIndex = 21;
+            this.tradeFeeBox.Text = "5.00";
+            this.tradeFeeBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // tradeFeeLabel
+            // 
+            this.tradeFeeLabel.AutoSize = true;
+            this.tradeFeeLabel.Location = new System.Drawing.Point(12, 299);
+            this.tradeFeeLabel.Name = "tradeFeeLabel";
+            this.tradeFeeLabel.Size = new System.Drawing.Size(59, 13);
+            this.tradeFeeLabel.TabIndex = 20;
+            this.tradeFeeLabel.Text = "Trade Fee:";
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(381, 315);
+            this.ClientSize = new System.Drawing.Size(373, 389);
+            this.Controls.Add(this.tradeFeeBox);
+            this.Controls.Add(this.tradeFeeLabel);
+            this.Controls.Add(this.mutationRateBox);
+            this.Controls.Add(this.genCountBox);
+            this.Controls.Add(this.genSizeBox);
+            this.Controls.Add(this.mutationLabel);
+            this.Controls.Add(this.genCountLabel);
+            this.Controls.Add(this.genSizeLabel);
             this.Controls.Add(this.runButton);
             this.Controls.Add(this.downloadButton);
             this.Controls.Add(this.endDatePicker);
@@ -202,6 +290,14 @@
         private System.Windows.Forms.DateTimePicker endDatePicker;
         private System.Windows.Forms.Button downloadButton;
         private System.Windows.Forms.Button runButton;
+        private System.Windows.Forms.Label genSizeLabel;
+        private System.Windows.Forms.Label genCountLabel;
+        private System.Windows.Forms.Label mutationLabel;
+        private System.Windows.Forms.TextBox genSizeBox;
+        private System.Windows.Forms.TextBox genCountBox;
+        private System.Windows.Forms.TextBox mutationRateBox;
+        private System.Windows.Forms.TextBox tradeFeeBox;
+        private System.Windows.Forms.Label tradeFeeLabel;
     }
 }
 

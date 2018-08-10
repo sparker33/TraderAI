@@ -14,7 +14,7 @@ namespace TraderAI
     public partial class MainForm : Form
     {
         // Statics
-        static string DEFAULTDIRECTORY = "C:\\11111";
+        static string DEFAULTDIRECTORY = "C:\\111\\Periphery";
 
         // Private fields
         private string selectedFileName;
@@ -93,7 +93,7 @@ namespace TraderAI
 
         private void runButton_Click(object sender, EventArgs e)
         {
-            StockTraderEvolutionChamber chamber = new StockTraderEvolutionChamber(stockDataPrintoutFile);
+            StockTraderEvolutionChamber chamber = new StockTraderEvolutionChamber(stockDataPrintoutFile, Single.Parse(tradeFeeBox.Text));
             runButton.Enabled = false;
 
             runBackgroundWorker.RunWorkerAsync(chamber);
@@ -159,7 +159,7 @@ namespace TraderAI
         // Async run helper function
         public bool EvolveTrader(StockTraderEvolutionChamber chamber, BackgroundWorker worker)
         {
-            //do stuff
+            chamber.RunEvolution(Int32.Parse(genCountBox.Text), Int32.Parse(genSizeBox.Text), Single.Parse(mutationRateBox.Text));
             return true;
         }
         #endregion

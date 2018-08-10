@@ -14,12 +14,14 @@ namespace TraderAI
     public partial class MainForm : Form
     {
         // Statics
-        static string DEFAULTDIRECTORY = "C:\\111\\Periphery";
+        static string DEFAULTDIRECTORY = "C:\\11111";
 
         // Private fields
         private string selectedFileName;
         private string outputFilePath;
-        private BackgroundWorker runWorker = new BackgroundWorker();
+        private BackgroundWorker downloadBackgroundWorker = new BackgroundWorker();
+        private BackgroundWorker runBackgroundWorker = new BackgroundWorker();
+        private string stockDataPrintoutFile;
 
         // Public accessors
         //reserved
@@ -28,10 +30,10 @@ namespace TraderAI
         {
             InitializeComponent();
 
-            runWorker.DoWork += new DoWorkEventHandler(runWorker_DoWork);
-            runWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(runWorker_RunWorkerCompleted);
-            //runWorker.WorkerReportsProgress = true;
-            //runWorker.ProgressChanged += new ProgressChangedEventHandler(runWorker_ProgressChanged);
+            downloadBackgroundWorker.DoWork += new DoWorkEventHandler(donwloadWorker_DoWork);
+            downloadBackgroundWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(downloadWorker_RunWorkerCompleted);
+            runBackgroundWorker.DoWork += new DoWorkEventHandler(runWorker_DoWork);
+            runBackgroundWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(runWorker_RunWorkerCompleted);
         }
 
         // Event handler for browsebutton; gets file to read list of tickers to scrape data for
@@ -77,24 +79,67 @@ namespace TraderAI
         }
 
         // Method that runs when "Run" button is clicked
-        private void runButton_Click(object sender, EventArgs e)
+        private void downloadButton_Click(object sender, EventArgs e)
         {
             StockDataDownloader downloader = new StockDataDownloader(selectedFileName,
                 exchangeColumnDropDown.SelectedIndex,
                 tickerColumnDropDown.SelectedIndex,
                 startDatePicker.Value,
                 endDatePicker.Value);
-            runButton.Enabled = false;
+            downloadButton.Enabled = false;
 
-            runWorker.RunWorkerAsync(downloader);
+            downloadBackgroundWorker.RunWorkerAsync(downloader);
         }
 
+        private void runButton_Click(object sender, EventArgs e)
+        {
+            StockTraderEvolutionChamber chamber = new StockTraderEvolutionChamber(stockDataPrintoutFile);
+            runButton.Enabled = false;
+
+            runBackgroundWorker.RunWorkerAsync(chamber);
+        }
+
+        #region DonwloadBackgroundworkerInstructions
+        // Async DoWork function
+        private void donwloadWorker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            BackgroundWorker worker = sender as BackgroundWorker;
+
+            e.Result = DownloadStockData((StockDataDownloader)e.Argument, worker);
+        }
+
+        // Async run completed function
+        private void downloadWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            if (e.Error != null)
+            {
+                MessageBox.Show(e.Error.Message);
+            }
+            else
+            {
+                MessageBox.Show("Completed Download");
+            }
+            downloadButton.Enabled = true;
+        }
+
+        // Async run helper function
+        public bool DownloadStockData(StockDataDownloader downloader, BackgroundWorker worker)
+        {
+            stockDataPrintoutFile = DEFAULTDIRECTORY + "\\StockData_" + DateTime.Now.Month.ToString() + "-" +
+                    DateTime.Now.Day.ToString() + "-" + DateTime.Now.Year.ToString() + "_" + DateTime.Now.Hour.ToString() +
+                    DateTime.Now.Minute.ToString() + DateTime.Now.Second.ToString() + DateTime.Now.Millisecond.ToString() + ".csv";
+            downloader.WriteDataToCSV(stockDataPrintoutFile);
+            return true;
+        }
+        #endregion
+
+        #region RunBackgroundworkerInstructions
         // Async DoWork function
         private void runWorker_DoWork(object sender, DoWorkEventArgs e)
         {
             BackgroundWorker worker = sender as BackgroundWorker;
 
-            e.Result = Process((StockDataDownloader)e.Argument, worker);
+            e.Result = EvolveTrader((StockTraderEvolutionChamber)e.Argument, worker);
         }
 
         // Async run completed function
@@ -106,21 +151,17 @@ namespace TraderAI
             }
             else
             {
-                //PlotViewer viewer = (PlotViewer)e.Result;
-                //viewer.Show();
-                MessageBox.Show("Completed");
+                MessageBox.Show("Completed Run");
             }
-            runButton.Enabled = true;
+            downloadButton.Enabled = true;
         }
 
         // Async run helper function
-        public bool Process(StockDataDownloader downloader, BackgroundWorker worker)
+        public bool EvolveTrader(StockTraderEvolutionChamber chamber, BackgroundWorker worker)
         {
-            string outputFileName = DEFAULTDIRECTORY + "\\StockData_" + DateTime.Now.Month.ToString() + "-" +
-                    DateTime.Now.Day.ToString() + "-" + DateTime.Now.Year.ToString() + "_" + DateTime.Now.Hour.ToString() +
-                    DateTime.Now.Minute.ToString() + DateTime.Now.Second.ToString() + DateTime.Now.Millisecond.ToString() + ".csv";
-            downloader.WriteDataToCSV(outputFileName);
+            //do stuff
             return true;
         }
+        #endregion
     }
 }

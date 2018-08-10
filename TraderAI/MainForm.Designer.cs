@@ -34,11 +34,12 @@
             this.exchangeColumnDropDown = new System.Windows.Forms.ComboBox();
             this.tickerColumnDropDown = new System.Windows.Forms.ComboBox();
             this.exchangeColLabel = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
+            this.tickerColLabel = new System.Windows.Forms.Label();
             this.endDateLabel = new System.Windows.Forms.Label();
             this.startDateLabel = new System.Windows.Forms.Label();
             this.startDatePicker = new System.Windows.Forms.DateTimePicker();
             this.endDatePicker = new System.Windows.Forms.DateTimePicker();
+            this.downloadButton = new System.Windows.Forms.Button();
             this.runButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
@@ -94,14 +95,14 @@
             this.exchangeColLabel.TabIndex = 6;
             this.exchangeColLabel.Text = "Exchange Data Column:";
             // 
-            // label2
+            // tickerColLabel
             // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(10, 133);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(104, 13);
-            this.label2.TabIndex = 7;
-            this.label2.Text = "Ticker Data Column:";
+            this.tickerColLabel.AutoSize = true;
+            this.tickerColLabel.Location = new System.Drawing.Point(10, 133);
+            this.tickerColLabel.Name = "tickerColLabel";
+            this.tickerColLabel.Size = new System.Drawing.Size(104, 13);
+            this.tickerColLabel.TabIndex = 7;
+            this.tickerColLabel.Text = "Ticker Data Column:";
             // 
             // endDateLabel
             // 
@@ -137,16 +138,27 @@
             this.endDatePicker.Name = "endDatePicker";
             this.endDatePicker.Size = new System.Drawing.Size(103, 20);
             this.endDatePicker.TabIndex = 11;
-            this.endDatePicker.Value = new System.DateTime(2018, 8, 4, 0, 0, 0, 0);
+            this.endDatePicker.Value = new System.DateTime(2017, 7, 24, 0, 0, 0, 0);
+            // 
+            // downloadButton
+            // 
+            this.downloadButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.downloadButton.Location = new System.Drawing.Point(12, 280);
+            this.downloadButton.Name = "downloadButton";
+            this.downloadButton.Size = new System.Drawing.Size(94, 23);
+            this.downloadButton.TabIndex = 12;
+            this.downloadButton.Text = "Download Data";
+            this.downloadButton.UseVisualStyleBackColor = true;
+            this.downloadButton.Click += new System.EventHandler(this.downloadButton_Click);
             // 
             // runButton
             // 
             this.runButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.runButton.Location = new System.Drawing.Point(12, 280);
+            this.runButton.Location = new System.Drawing.Point(112, 280);
             this.runButton.Name = "runButton";
-            this.runButton.Size = new System.Drawing.Size(75, 23);
-            this.runButton.TabIndex = 12;
-            this.runButton.Text = "Run";
+            this.runButton.Size = new System.Drawing.Size(94, 23);
+            this.runButton.TabIndex = 13;
+            this.runButton.Text = "Evolve Trader";
             this.runButton.UseVisualStyleBackColor = true;
             this.runButton.Click += new System.EventHandler(this.runButton_Click);
             // 
@@ -156,11 +168,12 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(381, 315);
             this.Controls.Add(this.runButton);
+            this.Controls.Add(this.downloadButton);
             this.Controls.Add(this.endDatePicker);
             this.Controls.Add(this.startDatePicker);
             this.Controls.Add(this.startDateLabel);
             this.Controls.Add(this.endDateLabel);
-            this.Controls.Add(this.label2);
+            this.Controls.Add(this.tickerColLabel);
             this.Controls.Add(this.exchangeColLabel);
             this.Controls.Add(this.tickerColumnDropDown);
             this.Controls.Add(this.exchangeColumnDropDown);
@@ -182,11 +195,12 @@
         private System.Windows.Forms.ComboBox exchangeColumnDropDown;
         private System.Windows.Forms.ComboBox tickerColumnDropDown;
         private System.Windows.Forms.Label exchangeColLabel;
-        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label tickerColLabel;
         private System.Windows.Forms.Label endDateLabel;
         private System.Windows.Forms.Label startDateLabel;
         private System.Windows.Forms.DateTimePicker startDatePicker;
         private System.Windows.Forms.DateTimePicker endDatePicker;
+        private System.Windows.Forms.Button downloadButton;
         private System.Windows.Forms.Button runButton;
     }
 }

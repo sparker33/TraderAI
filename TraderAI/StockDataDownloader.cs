@@ -117,7 +117,7 @@ namespace TraderAI
                 {
                     if (stockDataDictionaries[j].ContainsKey(orderedDates[i]))
                     {
-                        line[j + 1] = stockDataDictionaries[j][orderedDates[i]].ToString();
+                        line[j + 1] = stockDataDictionaries[j][orderedDates[i]].close.ToString();
                     }
                     else
                     {

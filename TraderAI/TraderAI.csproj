@@ -59,6 +59,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StockDataDownloader.cs" />
     <Compile Include="StockDataItem.cs" />
+    <Compile Include="StockTrader.cs" />
+    <Compile Include="StockTraderEvolutionChamber.cs" />
     <Compile Include="TickerDataItem.cs" />
     <Compile Include="WebClientForStockFinanceHistory.cs" />
     <EmbeddedResource Include="MainForm.resx">

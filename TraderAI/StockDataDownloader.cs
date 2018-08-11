@@ -134,7 +134,7 @@ namespace TraderAI
                 {
                     for (int i = 0; i < dataLine.Length - 1; i++)
                     {
-                        writer.Write(dataLine[i] + ", ");
+                        writer.Write(dataLine[i] + ",");
                     }
                     writer.Write(dataLine[dataLine.Length - 1]);
                     writer.Write("\r\n");

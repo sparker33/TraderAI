@@ -159,7 +159,18 @@ namespace TraderAI
         // Async run helper function
         public bool EvolveTrader(StockTraderEvolutionChamber chamber, BackgroundWorker worker)
         {
-            chamber.RunEvolution(Int32.Parse(genCountBox.Text), Int32.Parse(genSizeBox.Text), Single.Parse(mutationRateBox.Text));
+            List<float> bestTraderData = new List<float>(chamber.RunEvolution(Int32.Parse(genCountBox.Text), Int32.Parse(genSizeBox.Text), Single.Parse(mutationRateBox.Text)));
+            // Write bestTrader history results to file
+            using (StreamWriter writer = new StreamWriter(DEFAULTDIRECTORY + "\\BestTraderPerformance_" + DateTime.Now.Month.ToString() + "-" +
+                    DateTime.Now.Day.ToString() + "-" + DateTime.Now.Year.ToString() + "_" + DateTime.Now.Hour.ToString() +
+                    DateTime.Now.Minute.ToString() + DateTime.Now.Second.ToString() + DateTime.Now.Millisecond.ToString() + ".csv"))
+            {
+                writer.Write("PortfolioValue\r\n");
+                foreach (float d in bestTraderData)
+                {
+                    writer.Write(d.ToString() + "\r\n");
+                }
+            }
             return true;
         }
         #endregion

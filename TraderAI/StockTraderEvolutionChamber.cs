@@ -13,6 +13,7 @@ namespace TraderAI
         private List<StockTrader> traders;
         private List<float[]> stockPrices = new List<float[]>();
         private float perTradeFee;
+        private const float fundStartValue = 10000.00f;
 
         // Public objects
         //reserved
@@ -53,20 +54,20 @@ namespace TraderAI
 
         // Method to evolve set of traders
         // Saves network weights and records folio results for best trader
-        public void RunEvolution(int generations, int genSize, float mutationRate)
+        public List<float> RunEvolution(int generations, int genSize, float mutationRate)
         {
             // Initialize population of traders
             traders = new List<StockTrader>(genSize);
             for (int i = 0; i < genSize; i++)
             {
-                traders.Add(new StockTrader(10000.00f));
+                traders.Add(new StockTrader(fundStartValue));
             }
 
             // Loop through all generations
             for (int i = 0; i < generations; i++)
             {
-                Dictionary<int, int> traderToGlobalIndexLegend = new Dictionary<int, int>(stockPrices[0].Length);
                 // Run current generation through full market history
+                Dictionary<int, int> traderToGlobalIndexLegend = new Dictionary<int, int>(stockPrices[0].Length);
                 for (int j = 0; j < stockPrices.Count; j++)
                 {
                     // Update market with current values
@@ -100,26 +101,105 @@ namespace TraderAI
                         trader.Learn(trader.Trade(traderInputs, perTradeFee));
                     }
                 }
-                // Evaluate performance of all generation members
-                EvaluateTraders();
-                // Breed traders to generate next generation
-                BreedTraders();
+                // Determine population fitness range and weights
+                float popMinFitness = Single.MaxValue;
+                float popMaxFitness = Single.MinValue;
+                foreach (StockTrader trader in traders)
+                {
+                    if (popMinFitness < trader.PortfolioValue)
+                    {
+                        popMinFitness = trader.PortfolioValue;
+                    }
+                    if (popMaxFitness > trader.PortfolioValue)
+                    {
+                        popMaxFitness = trader.PortfolioValue;
+                    }
+                }
+                // Evaluate and Breed all generation members
+                BreedTraders(popMinFitness, popMaxFitness);
             }
 
             // Identify best trader and record results
-            //reserved
+            StockTrader bestTrader = traders[0];
+            foreach (StockTrader trader in traders)
+            {
+                if (trader.PortfolioValue > bestTrader.PortfolioValue)
+                {
+                    bestTrader = trader;
+                }
+            }
+            // Run bestTrader through full market history
+            bestTrader = bestTrader.Breed(bestTrader, fundStartValue);
+            List<float> bestTraderValueHistory = new List<float>(stockPrices.Count);
+            Dictionary<int, int> bestTraderToGlobalIndexLegend = new Dictionary<int, int>(stockPrices[0].Length);
+            for (int j = 0; j < stockPrices.Count; j++)
+            {
+                bestTraderValueHistory.Add(bestTrader.PortfolioValue);
+                // Update market with current values
+                List<float> traderInputs = new List<float>(stockPrices[0].Length);
+                for (int k = 0; k < bestTraderToGlobalIndexLegend.Keys.Count; k++)
+                {
+                    if (stockPrices[j][bestTraderToGlobalIndexLegend[k]] != 0.0f)
+                    {
+                        traderInputs.Add(stockPrices[j][bestTraderToGlobalIndexLegend[k]]);
+                    }
+                    else
+                    {
+                        bestTraderToGlobalIndexLegend.Remove(k);
+                        foreach (StockTrader trader in traders)
+                        {
+                            trader.RemoveStock(k);
+                        }
+                    }
+                }
+                for (int k = 0; k < stockPrices[j].Length; k++)
+                {
+                    if (stockPrices[j][k] != 0.0f && !bestTraderToGlobalIndexLegend.Values.Contains(k))
+                    {
+                        bestTraderToGlobalIndexLegend.Add(traderInputs.Count, k);
+                        traderInputs.Add(stockPrices[j][k]);
+                    }
+                }
+                // Obtain trader behavior, execute trades, and apply new learning
+                bestTrader.Learn(bestTrader.Trade(traderInputs, perTradeFee));
+            }
+            bestTraderValueHistory.Add(bestTrader.PortfolioValue);
+            return bestTraderValueHistory;
         }
 
         // Method to evaluate fitness of traders
-        private void EvaluateTraders()
+        private void BreedTraders(float minFitness, float maxFitness)
         {
-
-        }
-
-        // Method to evaluate fitness of traders
-        private void BreedTraders()
-        {
-
+            List<StockTrader>  childTraders = new List<StockTrader>(traders.Count);
+            Random random = new Random();
+            List<float> breedChances = new List<float>(traders.Count);
+            float t = 0.0f;
+            foreach (StockTrader trader in traders)
+            {
+                breedChances.Add(t + (trader.PortfolioValue - minFitness) / (maxFitness - minFitness));
+                t += breedChances.Last();
+            }
+            for (int i = 0; i < traders.Count; i++)
+            {
+                float breedticket1 = t * (float)random.NextDouble();
+                float breedticket2 = t * (float)random.NextDouble();
+                for (int j = 0; j < traders.Count; j++)
+                {
+                    if (breedChances[j] > breedticket1)
+                    {
+                        for (int k = 0; k < traders.Count; k++)
+                        {
+                            if (breedChances[k] > breedticket2)
+                            {
+                                childTraders.Add(traders[j].Breed(traders[k], fundStartValue));
+                                continue;
+                            }
+                        }
+                        continue;
+                    }
+                }
+            }
+            traders = childTraders;
         }
     }
 }

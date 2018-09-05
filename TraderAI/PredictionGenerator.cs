@@ -18,7 +18,7 @@ namespace TraderAI
 		private List<float[]> predictedPrices = new List<float[]>();
 
 		// Public objects
-		//reserved
+		public const float NewStockPercent = 99999.9f;
 
 		/// <summary>
 		/// Default class constructor; not intended for general use.
@@ -67,7 +67,9 @@ namespace TraderAI
 							}
 							historicalPrices.Add(prices);
 						}
-						interval = date2 - date1;
+						interval = date1 - date2;
+						startDate = date2 + interval;
+						predictedPrices.Add(historicalPrices.Last());
 					}
 				}
 			}
@@ -76,35 +78,108 @@ namespace TraderAI
 				System.Windows.Forms.MessageBox.Show("Stock Data History file format incorrect.");
 			}
 
-			// Populate the historic percent change data matrices from historic price data
-			for (int i = 0; i < historicalPrices.Count; i++)
+			// Convert price data to percent changes
+			List<float[]> percentHistories = new List<float[]>();
+			percentHistories.Add(new float[historicalPrices[0].Count()]);
+			for (int i = 0; i < historicalPrices[0].Count(); i++)
 			{
-				referenceHistories.Add(new List<Matrix>());
-				for (int n = 0; n < referenceHistories.Count(); n++)
+				if (historicalPrices[0][i] != 0.0f)
 				{
-					referenceHistories[n].Insert(0, new Matrix(order.Count(), n + 1));
-					for (int j = i - n; j < i + 1; j++)
+					percentHistories.Last()[i] = NewStockPercent;
+				}
+				else
+				{
+					percentHistories.Last()[i] = 0.0f;
+				}
+			}
+			for (int i = 1; i < historicalPrices.Count; i++)
+			{
+				percentHistories.Add(new float[historicalPrices[i].Count()]);
+				for (int j = 0; j < historicalPrices[i].Count(); j++)
+				{
+					if (historicalPrices[i][j] != 0.0f && historicalPrices[i - 1][j] == 0.0f)
 					{
-						for (int k = 0; k < order.Count(); k++)
-						{
-							referenceHistories[n][0][k][i - j] = historicalPrices[j][order[k]];
-						}
+						percentHistories.Last()[j] = NewStockPercent;
 					}
+					else if (historicalPrices[i][j] == 0.0f && historicalPrices[i - 1][j] == 0.0f)
+					{
+						percentHistories.Last()[j] = 0.0f;
+					}
+					else
+					{
+						percentHistories.Last()[j] = (historicalPrices[i][j] - historicalPrices[i - 1][j]) / historicalPrices[i - 1][j];
+					}
+				}
+			}
+			// Populate the historical percent change data matrices
+			for (int i = 0; i < percentHistories.Count; i++)
+			{
+				Vector newData = new Vector(percentHistories[i].Count());
+				for (int j = 0; j < percentHistories[i].Count(); j++)
+				{
+					newData.Add(percentHistories[i][order[j]]);
+				}
+				AddData(newData);
+			}
+		}
+
+		/// <summary>
+		/// Method to add a new data set to this predictor's matrices
+		/// </summary>
+		/// <param name="newPercentChanges"> Vector of new percent changes.
+		/// Vector must be ordered as the existing data (in order of IPO).
+		/// </param>
+		public void AddData(Vector newPercentChanges)
+		{
+			// Incorporate any new additions to the market
+			if (newPercentChanges.Count > referenceHistories[0][0].Count)
+			{
+				for (int i = 0; i < referenceHistories.Count; i++)
+				{
+					for (int j = 0; j < referenceHistories[i].Count; j++)
+					{
+						referenceHistories[i][j].Add(new Vector(referenceHistories[i][j].ColumnCount));
+					}
+				}
+			}
+			else if (newPercentChanges.Count < referenceHistories[0][0].Count)
+			{
+				System.Windows.Forms.MessageBox.Show("Input newPercentChanges for Predictor's AddData method is too short. Padding with zeros.");
+				while (newPercentChanges.Count < referenceHistories[0][0].RowCount)
+				{
+					newPercentChanges.Add(0.0f);
+				}
+			}
+
+			// Generate newest set of data matrices
+			referenceHistories.Add(new List<Matrix>());
+			for (int n = 0; n < referenceHistories.Count; n++)
+			{
+				referenceHistories[n].Insert(0, new Matrix(newPercentChanges.Count, n + 1));
+				for (int k = 0; k < newPercentChanges.Count; k++)
+				{
+					for (int j = referenceHistories.Count - n; j < referenceHistories.Count; j++)
+					{
+						referenceHistories[n][0][k][referenceHistories.Count - j] = referenceHistories[referenceHistories.Count - 2][1][k][referenceHistories.Count - j - 1];
+					}
+					referenceHistories[n][0][k][0] = newPercentChanges[k];
 				}
 			}
 		}
 
 		/// <summary>
-		/// Populates this PredictionGenerator's predictions from start Date to end Date
+		/// Populates this PredictionGenerator's predictions for an input number of time intervals
 		/// based on historical data collected on class constructions.
 		/// </summary>
-		/// <param name="start"> Date of first prediction. </param>
 		/// <param name="end"> Date of last prediction. </param>
-		public void GeneratePredictions(DateTime start, DateTime end)
+		public void GeneratePredictions(int intervals)
 		{
-			startDate = start;
+			// *** ADD OPTION TO SWITCH BETWEEN CUMULATIVE PREDICTIONS OR STATIC (do or don't update referenceHistories as predictions are made)? ***
+			// Predict percent changes
+			//(recursively predict and add data)
 
-			// run proceedural generation of predictions.
+			// Convert percent changes to price histories
+			//reserved (populate predictedPrices) *** MOVE TO SEPARATE METHOD? ***
 		}
 
 		/// <summary>

@@ -131,7 +131,20 @@ namespace TraderAI
 		/// </param>
 		public void AddData(Vector newPercentChanges)
 		{
-			// Incorporate any new additions to the market
+			referenceHistories.Add(new List<Matrix>());
+
+			// Initialize referenceHistories if it has not yet been assigned to
+			if (referenceHistories.Count == 0)
+			{
+				referenceHistories[0].Add(new Matrix(newPercentChanges.Count, 1));
+				for (int k = 0; k < newPercentChanges.Count; k++)
+				{
+					referenceHistories[0][0][k][0] = newPercentChanges[k];
+				}
+				return;
+			}
+
+			// Incorporate any new additions to the market in existing data matrices
 			if (newPercentChanges.Count > referenceHistories[0][0].Count)
 			{
 				for (int i = 0; i < referenceHistories.Count; i++)
@@ -152,7 +165,6 @@ namespace TraderAI
 			}
 
 			// Generate newest set of data matrices
-			referenceHistories.Add(new List<Matrix>());
 			for (int n = 0; n < referenceHistories.Count; n++)
 			{
 				referenceHistories[n].Insert(0, new Matrix(newPercentChanges.Count, n + 1));
@@ -171,15 +183,48 @@ namespace TraderAI
 		/// Populates this PredictionGenerator's predictions for an input number of time intervals
 		/// based on historical data collected on class constructions.
 		/// </summary>
-		/// <param name="end"> Date of last prediction. </param>
+		/// <param name="intervals"> Number of time intervals to predict. </param>
 		public void GeneratePredictions(int intervals)
 		{
-			// *** ADD OPTION TO SWITCH BETWEEN CUMULATIVE PREDICTIONS OR STATIC (do or don't update referenceHistories as predictions are made)? ***
-			// Predict percent changes
-			//(recursively predict and add data)
+			if (intervals > referenceHistories.Count - 1) { System.Windows.Forms.MessageBox.Show("Insufficient historical data for requested prediction duration."); return; }
+			/* ADD OPTION TO SWITCH BETWEEN CUMULATIVE PREDICTIONS OR STATIC (do or don't update referenceHistories as predictions are made)?
+			 * current version only does static computation; cumulative would require calling AddData(new Vector(predictedPrices.Last()))
+			 * following each add to predictedPrices. Additionally, predicted prices would have to store its values and average in new
+			 * predictions from different time scales as they become available. */
 
-			// Convert percent changes to price histories
-			//reserved (populate predictedPrices) *** MOVE TO SEPARATE METHOD? ***
+			/* Predict percent changes */
+			// Generate C matrixes
+			List<List<Matrix>> C = new List<List<Matrix>>();
+			for (int i = 0; i < referenceHistories.Count - 1; i++)
+			{
+				C.Add(new List<Matrix>());
+				for (int j = 0; j < referenceHistories[0].Count - 1; j++)
+				{
+					C[i].Add(referenceHistories[i][j + 1] * Matrix.Transpose(referenceHistories[i][0]));
+					// Normalize rows of C matrixes
+					for (int k = 0; k < C[i][j].Count; k++)
+					{
+						C[i][j][k] = (1.0f / (referenceHistories[i][j + 1][k] * referenceHistories[i][j + 1][k])) * C[i][j][k];
+						C[i][j][k].Magnitude = 1.0f;
+					}
+				}
+			}
+			// Calculate predictions
+			for (int n = 0; n < intervals; n++)
+			{
+				float norm = 0.0f;
+				Vector nextPrices = new Vector(predictedPrices.Last().Count());
+				for (int i = 0; i < C.Count; i++)
+				{
+					for (int j = 0; j < C[i].Count; j++)
+					{
+						nextPrices += Matrix.Transpose(referenceHistories[i][j + 1]) * C[i][j][n]; // This is probably wrong and needs checking
+						norm ++;
+					}
+				}
+				nextPrices = (1.0f / norm) * nextPrices;
+				predictedPrices.Add(nextPrices.ToArray());
+			}
 		}
 
 		/// <summary>

@@ -262,7 +262,7 @@ namespace TraderAI
 			}
 			else
 			{
-				MessageBox.Show("Completed Run");
+				MessageBox.Show("Completed Predictions");
 			}
 			predictionButton.Enabled = true;
 		}

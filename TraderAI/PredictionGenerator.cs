@@ -114,10 +114,10 @@ namespace TraderAI
 			// Populate the historical percent change data matrices
 			for (int i = 0; i < percentHistories.Count; i++)
 			{
-				Vector newData = new Vector(percentHistories[i].Count());
-				for (int j = 0; j < percentHistories[i].Count(); j++)
+				Vector newData = new Vector(percentHistories[i].Length);
+				for (int j = 0; j < percentHistories[i].Length; j++)
 				{
-					newData.Add(percentHistories[i][order[j]]);
+					newData[j] = percentHistories[i][order[j]];
 				}
 				AddData(newData);
 			}
@@ -134,7 +134,7 @@ namespace TraderAI
 			referenceHistories.Add(new List<Matrix>());
 
 			// Initialize referenceHistories if it has not yet been assigned to
-			if (referenceHistories.Count == 0)
+			if (referenceHistories.Count == 1)
 			{
 				referenceHistories[0].Add(new Matrix(newPercentChanges.Count, 1));
 				for (int k = 0; k < newPercentChanges.Count; k++)
@@ -198,15 +198,21 @@ namespace TraderAI
 			for (int i = 0; i < referenceHistories.Count - 1; i++)
 			{
 				C.Add(new List<Matrix>());
-				for (int j = 0; j < referenceHistories[0].Count - 1; j++)
+				for (int j = 0; j < referenceHistories[i].Count - 1; j++)
 				{
 					C[i].Add(referenceHistories[i][j + 1] * Matrix.Transpose(referenceHistories[i][0]));
 					// Normalize rows of C matrixes
 					for (int k = 0; k < C[i][j].Count; k++)
 					{
 						C[i][j][k] = (1.0f / (referenceHistories[i][j + 1][k] * referenceHistories[i][j + 1][k])) * C[i][j][k];
+					}
+					// Normalize columns of C matrixes
+					C[i][j] = Matrix.Transpose(C[i][j]);
+					for (int k = 0; k < C[i][j].Count; k++)
+					{
 						C[i][j][k].Magnitude = 1.0f;
 					}
+					C[i][j] = Matrix.Transpose(C[i][j]);
 				}
 			}
 			// Calculate predictions
@@ -218,11 +224,15 @@ namespace TraderAI
 				{
 					for (int j = 0; j < C[i].Count; j++)
 					{
-						nextPrices += Matrix.Transpose(referenceHistories[i][j + 1]) * C[i][j][n]; // This is probably wrong and needs checking
+						nextPrices += Matrix.Transpose( Matrix.Transpose(referenceHistories[0][j]) * C[i][j] )[0];
 						norm ++;
 					}
 				}
 				nextPrices = (1.0f / norm) * nextPrices;
+				for (int i = 0; i < nextPrices.Count; i++)
+				{
+					nextPrices[i] *= predictedPrices.Last()[i];
+				}
 				predictedPrices.Add(nextPrices.ToArray());
 			}
 		}

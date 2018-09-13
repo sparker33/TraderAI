@@ -99,7 +99,7 @@ namespace TraderAI
 		{
 			if (stockDataPrintoutFile == null)
 			{
-				System.Windows.Forms.MessageBox.Show("Invalid stock data file path. Please select a formatted" +
+				System.Windows.Forms.MessageBox.Show("Invalid stock data file path. Please select a formatted " +
 					"stock data file or run the downloader to generate one.");
 				OpenFileDialog selectFileDialog = new OpenFileDialog();
 				if (DEFAULTDIRECTORY == String.Empty)
@@ -116,7 +116,7 @@ namespace TraderAI
 				if (selectFileDialog.ShowDialog() == DialogResult.OK)
 				{
 					stockDataPrintoutFile = selectFileDialog.FileName;
-					DEFAULTDIRECTORY = selectedFileName.Trim().Remove(selectedFileName.LastIndexOf(@"\"));
+					DEFAULTDIRECTORY = stockDataPrintoutFile.Trim().Remove(stockDataPrintoutFile.LastIndexOf(@"\"));
 					outputFilePath = DEFAULTDIRECTORY;
 				}
 				else
@@ -136,7 +136,7 @@ namespace TraderAI
 		{
 			if (stockDataPrintoutFile == null)
 			{
-				System.Windows.Forms.MessageBox.Show("Invalid stock data file path. Please select a formatted" +
+				System.Windows.Forms.MessageBox.Show("Invalid stock data file path. Please select a formatted " +
 					"stock data file or run the downloader to generate one.");
 				OpenFileDialog selectFileDialog = new OpenFileDialog();
 				if (DEFAULTDIRECTORY == String.Empty)
@@ -153,7 +153,7 @@ namespace TraderAI
 				if (selectFileDialog.ShowDialog() == DialogResult.OK)
 				{
 					stockDataPrintoutFile = selectFileDialog.FileName;
-					DEFAULTDIRECTORY = selectedFileName.Trim().Remove(selectedFileName.LastIndexOf(@"\"));
+					DEFAULTDIRECTORY = stockDataPrintoutFile.Trim().Remove(stockDataPrintoutFile.LastIndexOf(@"\"));
 					outputFilePath = DEFAULTDIRECTORY;
 				}
 				else
@@ -162,10 +162,10 @@ namespace TraderAI
 				}
 			}
 
-			StockTraderEvolutionChamber chamber = new StockTraderEvolutionChamber(stockDataPrintoutFile, Single.Parse(tradeFeeBox.Text));
+			PredictionGenerator predictor = new PredictionGenerator(stockDataPrintoutFile);
 			predictionButton.Enabled = false;
 
-			predictionBackgroundWorker.RunWorkerAsync(chamber);
+			predictionBackgroundWorker.RunWorkerAsync(predictor);
 		}
 
 		#region DonwloadBackgroundworkerInstructions

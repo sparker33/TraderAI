@@ -224,7 +224,9 @@ namespace TraderAI
 				{
 					for (int j = 0; j < C[i].Count; j++)
 					{
-						nextPrices += Matrix.Transpose( Matrix.Transpose(referenceHistories[0][j]) * C[i][j] )[0];
+						Matrix refTransp = Matrix.Transpose(referenceHistories[0][j]);
+						Matrix breakout = refTransp * C[i][j];
+						nextPrices += breakout[0];
 						norm ++;
 					}
 				}

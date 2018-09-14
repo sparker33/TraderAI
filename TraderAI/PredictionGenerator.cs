@@ -192,7 +192,6 @@ namespace TraderAI
 			 * following each add to predictedPrices. Additionally, predicted prices would have to store its values and average in new
 			 * predictions from different time scales as they become available. */
 
-			/* Predict percent changes */
 			// Generate C matrixes
 			List<List<Matrix>> C = new List<List<Matrix>>();
 			for (int i = 0; i < referenceHistories.Count - 1; i++)
@@ -228,7 +227,7 @@ namespace TraderAI
 					for (int j = 0; j < C[i].Count; j++)
 					{
 						nextPrices += (Matrix.Transpose(referenceHistories[0][j]) * C[i][j])[0];
-						norm ++;
+						norm++;
 					}
 				}
 				nextPrices = (1.0f / norm) * nextPrices;

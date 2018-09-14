@@ -68,7 +68,7 @@ namespace TraderAI
 							historicalPrices.Add(prices);
 						}
 						interval = date1 - date2;
-						startDate = date2;
+						startDate = date1;
 						predictedPrices.Add(historicalPrices.Last());
 					}
 				}

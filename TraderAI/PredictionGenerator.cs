@@ -172,7 +172,7 @@ namespace TraderAI
 				{
 					for (int j = referenceHistories.Count - n; j < referenceHistories.Count; j++)
 					{
-						referenceHistories[n][0][k][referenceHistories.Count - j] = referenceHistories[referenceHistories.Count - 2][1][k][referenceHistories.Count - j - 1];
+						referenceHistories[n][0][k][referenceHistories.Count - j] = referenceHistories[referenceHistories.Count - 2][0][k][referenceHistories.Count - j - 1];
 					}
 					referenceHistories[n][0][k][0] = newPercentChanges[k];
 				}

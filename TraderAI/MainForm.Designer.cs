@@ -50,7 +50,7 @@
 			this.tradeFeeBox = new System.Windows.Forms.TextBox();
 			this.tradeFeeLabel = new System.Windows.Forms.Label();
 			this.predictionButton = new System.Windows.Forms.Button();
-			this.textBox1 = new System.Windows.Forms.TextBox();
+			this.predictIntervalsBox = new System.Windows.Forms.TextBox();
 			this.SuspendLayout();
 			// 
 			// tickerListInputLabel
@@ -255,21 +255,21 @@
 			this.predictionButton.UseVisualStyleBackColor = true;
 			this.predictionButton.Click += new System.EventHandler(this.predictionButton_Click);
 			// 
-			// textBox1
+			// predictIntervalsBox
 			// 
-			this.textBox1.Location = new System.Drawing.Point(212, 328);
-			this.textBox1.Name = "textBox1";
-			this.textBox1.Size = new System.Drawing.Size(62, 20);
-			this.textBox1.TabIndex = 23;
-			this.textBox1.Text = "270";
-			this.textBox1.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+			this.predictIntervalsBox.Location = new System.Drawing.Point(212, 328);
+			this.predictIntervalsBox.Name = "predictIntervalsBox";
+			this.predictIntervalsBox.Size = new System.Drawing.Size(62, 20);
+			this.predictIntervalsBox.TabIndex = 23;
+			this.predictIntervalsBox.Text = "270";
+			this.predictIntervalsBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
 			// 
 			// MainForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(373, 389);
-			this.Controls.Add(this.textBox1);
+			this.Controls.Add(this.predictIntervalsBox);
 			this.Controls.Add(this.predictionButton);
 			this.Controls.Add(this.tradeFeeBox);
 			this.Controls.Add(this.tradeFeeLabel);
@@ -323,7 +323,7 @@
         private System.Windows.Forms.TextBox tradeFeeBox;
         private System.Windows.Forms.Label tradeFeeLabel;
 		private System.Windows.Forms.Button predictionButton;
-		private System.Windows.Forms.TextBox textBox1;
+		private System.Windows.Forms.TextBox predictIntervalsBox;
 	}
 }
 

@@ -270,8 +270,7 @@ namespace TraderAI
 		// Async run helper function
 		public bool GeneratePrediction(PredictionGenerator predictor, BackgroundWorker worker)
 		{
-			//predictor.GeneratePredictions(endDatePicker.Value, DateTime.Now);
-			predictor.GeneratePredictions(Int32.Parse(textBox1.Text));
+			predictor.RecursiveGeneratePredictions(Int32.Parse(predictIntervalsBox.Text));
 			string predictionDataPrintoutFile = DEFAULTDIRECTORY + "\\PredictionData_" + DateTime.Now.Month.ToString() + "-" +
 					DateTime.Now.Day.ToString() + "-" + DateTime.Now.Year.ToString() + "_" + DateTime.Now.Hour.ToString() +
 					DateTime.Now.Minute.ToString() + DateTime.Now.Second.ToString() + DateTime.Now.Millisecond.ToString() + ".csv";

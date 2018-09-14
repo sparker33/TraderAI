@@ -272,7 +272,7 @@ namespace TraderAI
 		{
 			//predictor.GeneratePredictions(endDatePicker.Value, DateTime.Now);
 			predictor.GeneratePredictions(104);
-			string predictionDataPrintoutFile = DEFAULTDIRECTORY + "\\StockData_" + DateTime.Now.Month.ToString() + "-" +
+			string predictionDataPrintoutFile = DEFAULTDIRECTORY + "\\PredictionData_" + DateTime.Now.Month.ToString() + "-" +
 					DateTime.Now.Day.ToString() + "-" + DateTime.Now.Year.ToString() + "_" + DateTime.Now.Hour.ToString() +
 					DateTime.Now.Minute.ToString() + DateTime.Now.Second.ToString() + DateTime.Now.Millisecond.ToString() + ".csv";
 			predictor.WriteDataToCSV(predictionDataPrintoutFile);

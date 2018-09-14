@@ -18,7 +18,7 @@ namespace TraderAI
 		private List<float[]> predictedPrices = new List<float[]>();
 
 		// Public objects
-		public const float NewStockPercent = 99999.9f;
+		public const float NewStockPercent = 1.0f;
 
 		/// <summary>
 		/// Default class constructor; not intended for general use.
@@ -68,7 +68,7 @@ namespace TraderAI
 							historicalPrices.Add(prices);
 						}
 						interval = date1 - date2;
-						startDate = date2 + interval;
+						startDate = date2;
 						predictedPrices.Add(historicalPrices.Last());
 					}
 				}
@@ -204,7 +204,10 @@ namespace TraderAI
 					// Normalize rows of C matrixes
 					for (int k = 0; k < C[i][j].Count; k++)
 					{
-						C[i][j][k] = (1.0f / (referenceHistories[i][j + 1][k] * referenceHistories[i][j + 1][k])) * C[i][j][k];
+						if ((referenceHistories[i][j + 1][k] * referenceHistories[i][j + 1][k]) != 0.0f)
+						{
+							C[i][j][k] = (1.0f / (referenceHistories[i][j + 1][k] * referenceHistories[i][j + 1][k])) * C[i][j][k];
+						}
 					}
 					// Normalize columns of C matrixes
 					C[i][j] = Matrix.Transpose(C[i][j]);
@@ -224,16 +227,14 @@ namespace TraderAI
 				{
 					for (int j = 0; j < C[i].Count; j++)
 					{
-						Matrix refTransp = Matrix.Transpose(referenceHistories[0][j]);
-						Matrix breakout = refTransp * C[i][j];
-						nextPrices += breakout[0];
+						nextPrices += (Matrix.Transpose(referenceHistories[0][j]) * C[i][j])[0];
 						norm ++;
 					}
 				}
 				nextPrices = (1.0f / norm) * nextPrices;
 				for (int i = 0; i < nextPrices.Count; i++)
 				{
-					nextPrices[i] *= predictedPrices.Last()[i];
+					nextPrices[i] = (1.0f + nextPrices[i]) * predictedPrices.Last()[i];
 				}
 				predictedPrices.Add(nextPrices.ToArray());
 			}
@@ -270,7 +271,7 @@ namespace TraderAI
 					}
 				}
 				dataToWrite.Add(line);
-				predictionDate.Add(interval);
+				predictionDate = predictionDate.Add(interval);
 			}
 
 			// Write to file

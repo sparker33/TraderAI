@@ -204,12 +204,12 @@ namespace TraderAI
 					// Normalize rows of C matrixes
 					for (int k = 0; k < C[i][j].Count; k++)
 					{
-						if ((referenceHistories[i][j + 1][k] * referenceHistories[i][j + 1][k]) != 0.0f)
+						if (referenceHistories[i][j + 1][k].Magnitude != 0.0f)
 						{
-							C[i][j][k] = (1.0f / (referenceHistories[i][j + 1][k] * referenceHistories[i][j + 1][k])) * C[i][j][k];
+							C[i][j][k] = (1.0f / referenceHistories[i][j + 1][k].Magnitude) * C[i][j][k];
 						}
 					}
-					// Normalize columns of C matrixes
+					// Unitize columns of C matrixes
 					C[i][j] = Matrix.Transpose(C[i][j]);
 					for (int k = 0; k < C[i][j].Count; k++)
 					{

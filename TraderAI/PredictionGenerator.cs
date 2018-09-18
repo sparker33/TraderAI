@@ -18,7 +18,7 @@ namespace TraderAI
 		private List<float[]> predictedPrices = new List<float[]>();
 
 		// Public objects
-		public const float NewStockPercent = 99999.9f;
+		public const float NewStockPercent = 1.0f;
 
 		/// <summary>
 		/// Default class constructor; not intended for general use.
@@ -68,7 +68,7 @@ namespace TraderAI
 							historicalPrices.Add(prices);
 						}
 						interval = date1 - date2;
-						startDate = date2 + interval;
+						startDate = date1;
 						predictedPrices.Add(historicalPrices.Last());
 					}
 				}
@@ -180,20 +180,57 @@ namespace TraderAI
 		}
 
 		/// <summary>
+		/// Removes the oldest data set in this PredictionGenerator
+		/// </summary>
+		public void RemoveOldestData()
+		{
+			for (int i = 0; i < referenceHistories.Count; i++)
+			{
+				referenceHistories[i].RemoveAt(referenceHistories[i].Count - 1);
+			}
+			referenceHistories.RemoveAt(referenceHistories.Count - 1);
+		}
+
+		/// <summary>
 		/// Populates this PredictionGenerator's predictions for an input number of time intervals
-		/// based on historical data collected on class constructions.
+		/// based on historical data collected on class construction. This method recursively adds
+		/// its new predictions to its own historical data during the generation, allowing indefinite
+		/// intervals of prediction.
 		/// </summary>
 		/// <param name="intervals"> Number of time intervals to predict. </param>
-		public void GeneratePredictions(int intervals)
+		public void RecursiveGeneratePredictions(int intervals)
 		{
-			if (intervals > referenceHistories.Count - 1) { System.Windows.Forms.MessageBox.Show("Insufficient historical data for requested prediction duration."); return; }
-			/* ADD OPTION TO SWITCH BETWEEN CUMULATIVE PREDICTIONS OR STATIC (do or don't update referenceHistories as predictions are made)?
-			 * current version only does static computation; cumulative would require calling AddData(new Vector(predictedPrices.Last()))
-			 * following each add to predictedPrices. Additionally, predicted prices would have to store its values and average in new
-			 * predictions from different time scales as they become available. */
+			// Develop the predictions
+			for (int n = 0; n < intervals; n++)
+			{
+				List<List<Matrix>> C = GetC();
+				float norm = 0.0f;
+				Vector nextPrices = new Vector(predictedPrices.Last().Count());
+				for (int i = 0; i < C.Count; i++)
+				{
+					for (int j = 0; j < C[i].Count; j++)
+					{
+						nextPrices += (Matrix.Transpose(referenceHistories[0][j]) * C[i][j])[0];
+						norm++;
+					}
+				}
+				nextPrices = (1.0f / norm) * nextPrices;
+				this.RemoveOldestData();
+				this.AddData(nextPrices);
+				for (int i = 0; i < nextPrices.Count; i++)
+				{
+					nextPrices[i] = (1.0f + nextPrices[i]) * predictedPrices.Last()[i];
+				}
+				predictedPrices.Add(nextPrices.ToArray());
+			}
+		}
 
-			/* Predict percent changes */
-			// Generate C matrixes
+		/// <summary>
+		/// Helper method to generate the Correlation matrices
+		/// </summary>
+		/// <returns> Jagged array list of correlation matrices. </returns>
+		private List<List<Matrix>> GetC()
+		{
 			List<List<Matrix>> C = new List<List<Matrix>>();
 			for (int i = 0; i < referenceHistories.Count - 1; i++)
 			{
@@ -204,9 +241,12 @@ namespace TraderAI
 					// Normalize rows of C matrixes
 					for (int k = 0; k < C[i][j].Count; k++)
 					{
-						C[i][j][k] = (1.0f / (referenceHistories[i][j + 1][k] * referenceHistories[i][j + 1][k])) * C[i][j][k];
+						if (referenceHistories[i][j + 1][k].Magnitude != 0.0f)
+						{
+							C[i][j][k] = (1.0f / referenceHistories[i][j + 1][k].Magnitude) * C[i][j][k];
+						}
 					}
-					// Normalize columns of C matrixes
+					// Unitize columns of C matrixes
 					C[i][j] = Matrix.Transpose(C[i][j]);
 					for (int k = 0; k < C[i][j].Count; k++)
 					{
@@ -215,26 +255,7 @@ namespace TraderAI
 					C[i][j] = Matrix.Transpose(C[i][j]);
 				}
 			}
-			// Calculate predictions
-			for (int n = 0; n < intervals; n++)
-			{
-				float norm = 0.0f;
-				Vector nextPrices = new Vector(predictedPrices.Last().Count());
-				for (int i = 0; i < C.Count; i++)
-				{
-					for (int j = 0; j < C[i].Count; j++)
-					{
-						nextPrices += Matrix.Transpose( Matrix.Transpose(referenceHistories[0][j]) * C[i][j] )[0];
-						norm ++;
-					}
-				}
-				nextPrices = (1.0f / norm) * nextPrices;
-				for (int i = 0; i < nextPrices.Count; i++)
-				{
-					nextPrices[i] *= predictedPrices.Last()[i];
-				}
-				predictedPrices.Add(nextPrices.ToArray());
-			}
+			return C;
 		}
 
 		/// <summary>
@@ -268,7 +289,7 @@ namespace TraderAI
 					}
 				}
 				dataToWrite.Add(line);
-				predictionDate.Add(interval);
+				predictionDate = predictionDate.Add(interval);
 			}
 
 			// Write to file

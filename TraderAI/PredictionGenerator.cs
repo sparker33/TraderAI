@@ -192,13 +192,45 @@ namespace TraderAI
 		}
 
 		/// <summary>
+		/// Adds newest data and generates prediction for the next set of market values.
+		/// </summary>
+		/// <param name="currentPrices"> Vector of current market prices.
+		/// Vector must be ordered as the existing data (in order of IPO).
+		/// </param>
+		/// <returns> Vector of predicted prices for the next interval time. </returns>
+		public Vector GetNextPrediction(Vector currentPrices)
+		{
+			this.AddData(currentPrices);
+
+			List<List<Matrix>> C = GetC();
+			float norm = 0.0f;
+			Vector nextPrices = new Vector(predictedPrices.Last().Count());
+			for (int i = 0; i < C.Count; i++)
+			{
+				for (int j = 0; j < C[i].Count; j++)
+				{
+					nextPrices += (Matrix.Transpose(referenceHistories[0][j]) * C[i][j])[0];
+					norm++;
+				}
+			}
+			nextPrices = (1.0f / norm) * nextPrices;
+			for (int i = 0; i < nextPrices.Count; i++)
+			{
+				nextPrices[i] = (1.0f + nextPrices[i]) * predictedPrices.Last()[i];
+			}
+			predictedPrices.Add(nextPrices.ToArray());
+
+			return nextPrices;
+		}
+
+		/// <summary>
 		/// Populates this PredictionGenerator's predictions for an input number of time intervals
 		/// based on historical data collected on class construction. This method recursively adds
 		/// its new predictions to its own historical data during the generation, allowing indefinite
 		/// intervals of prediction.
 		/// </summary>
 		/// <param name="intervals"> Number of time intervals to predict. </param>
-		public void RecursiveGeneratePredictions(int intervals)
+		public void RecursiveGetPredictions(int intervals)
 		{
 			// Develop the predictions
 			for (int n = 0; n < intervals; n++)

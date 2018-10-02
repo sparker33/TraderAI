@@ -14,7 +14,7 @@ namespace TraderAI
     public partial class MainForm : Form
     {
         // Statics
-        static string DEFAULTDIRECTORY = "C:\\111\\Periphery";
+        public static string DEFAULTDIRECTORY = "C:\\111\\Periphery";
 
         // Private fields
         private string selectedFileName;
@@ -23,11 +23,12 @@ namespace TraderAI
 		private BackgroundWorker evolveBackgroundWorker = new BackgroundWorker();
 		private BackgroundWorker predictionBackgroundWorker = new BackgroundWorker();
 		private string stockDataPrintoutFile;
+		private string trainingDataPrintoutFile;
 
-        // Public accessors
-        //reserved
+		// Public accessors
+		//reserved
 
-        public MainForm()
+		public MainForm()
         {
             InitializeComponent();
 
@@ -124,19 +125,9 @@ namespace TraderAI
 					return;
 				}
 			}
-
-			StockTraderEvolutionChamber chamber = new StockTraderEvolutionChamber(stockDataPrintoutFile, Single.Parse(tradeFeeBox.Text));
-			evolveButton.Enabled = false;
-
-			evolveBackgroundWorker.RunWorkerAsync(chamber);
-		}
-
-		// Method to handle clicking the Prediction button
-		private void predictionButton_Click(object sender, EventArgs e)
-		{
-			if (stockDataPrintoutFile == null)
+			if (trainingDataPrintoutFile == null)
 			{
-				System.Windows.Forms.MessageBox.Show("Invalid stock data file path. Please select a formatted " +
+				System.Windows.Forms.MessageBox.Show("Invalid training data file path. Please select a formatted " +
 					"stock data file or run the downloader to generate one.");
 				OpenFileDialog selectFileDialog = new OpenFileDialog();
 				if (DEFAULTDIRECTORY == String.Empty)
@@ -152,8 +143,8 @@ namespace TraderAI
 
 				if (selectFileDialog.ShowDialog() == DialogResult.OK)
 				{
-					stockDataPrintoutFile = selectFileDialog.FileName;
-					DEFAULTDIRECTORY = stockDataPrintoutFile.Trim().Remove(stockDataPrintoutFile.LastIndexOf(@"\"));
+					trainingDataPrintoutFile = selectFileDialog.FileName;
+					DEFAULTDIRECTORY = trainingDataPrintoutFile.Trim().Remove(trainingDataPrintoutFile.LastIndexOf(@"\"));
 					outputFilePath = DEFAULTDIRECTORY;
 				}
 				else
@@ -162,7 +153,44 @@ namespace TraderAI
 				}
 			}
 
-			PredictionGenerator predictor = new PredictionGenerator(stockDataPrintoutFile);
+			StockTraderEvolutionChamber chamber = new StockTraderEvolutionChamber(stockDataPrintoutFile, trainingDataPrintoutFile, Single.Parse(tradeFeeBox.Text));
+			evolveButton.Enabled = false;
+
+			evolveBackgroundWorker.RunWorkerAsync(chamber);
+		}
+
+		// Method to handle clicking the Prediction button
+		private void predictionButton_Click(object sender, EventArgs e)
+		{
+			if (trainingDataPrintoutFile == null)
+			{
+				System.Windows.Forms.MessageBox.Show("Invalid training data file path. Please select a formatted " +
+					"stock data file or run the downloader to generate one.");
+				OpenFileDialog selectFileDialog = new OpenFileDialog();
+				if (DEFAULTDIRECTORY == String.Empty)
+				{
+					selectFileDialog.InitialDirectory = "C:\\";
+				}
+				else
+				{
+					selectFileDialog.InitialDirectory = DEFAULTDIRECTORY;
+				}
+				selectFileDialog.Filter = "sdp files (*.sdp)|*.sdp";
+				selectFileDialog.FilterIndex = 1;
+
+				if (selectFileDialog.ShowDialog() == DialogResult.OK)
+				{
+					trainingDataPrintoutFile = selectFileDialog.FileName;
+					DEFAULTDIRECTORY = trainingDataPrintoutFile.Trim().Remove(trainingDataPrintoutFile.LastIndexOf(@"\"));
+					outputFilePath = DEFAULTDIRECTORY;
+				}
+				else
+				{
+					return;
+				}
+			}
+
+			PredictionGenerator predictor = new PredictionGenerator(trainingDataPrintoutFile);
 			predictionButton.Enabled = false;
 
 			predictionBackgroundWorker.RunWorkerAsync(predictor);
@@ -270,7 +298,7 @@ namespace TraderAI
 		// Async run helper function
 		public bool GeneratePrediction(PredictionGenerator predictor, BackgroundWorker worker)
 		{
-			predictor.RecursiveGeneratePredictions(Int32.Parse(predictIntervalsBox.Text));
+			predictor.RecursiveGetPredictions(Int32.Parse(predictIntervalsBox.Text));
 			string predictionDataPrintoutFile = DEFAULTDIRECTORY + "\\PredictionData_" + DateTime.Now.Month.ToString() + "-" +
 					DateTime.Now.Day.ToString() + "-" + DateTime.Now.Year.ToString() + "_" + DateTime.Now.Hour.ToString() +
 					DateTime.Now.Minute.ToString() + DateTime.Now.Second.ToString() + DateTime.Now.Millisecond.ToString() + ".csv";

@@ -192,29 +192,81 @@ namespace TraderAI
 		}
 
 		/// <summary>
+		/// Adds newest data and generates prediction for the next set of market values.
+		/// </summary>
+		/// <param name="currentPrices"> Vector of current market prices.
+		/// Vector must be ordered as the existing data (in order of IPO).
+		/// </param>
+		/// <returns> Vector of predicted prices for the next interval time. </returns>
+		public Vector GetNextPrediction(Vector currentPctChgs)
+		{
+			this.AddData(currentPctChgs);
+
+			List<List<Matrix>> C = GetC();
+			Vector nextPrices = new Vector(predictedPrices.Last().Count());
+			// Weighted average method
+			for (int i = 0; i < C.Count; i++)
+			{
+				for (int j = 1; j < C[i].Count; j++)
+				{
+					nextPrices += (1.0f / C[i].Count) * (Matrix.Transpose(referenceHistories[0][j]) * C[i][j])[0];
+				}
+			}
+			nextPrices = (1.0f / C.Count) * nextPrices;
+			// Max Likelihood method
+			//for (int i = 0; i < nextPrices.Count; i++)
+			//{
+			//	int[] maxProbIndex = new int[3];
+			//	for (int j = 0; j < C.Count; j++)
+			//	{
+			//		for (int k = 0; k < C[j].Count; k++)
+			//		{
+			//			for (int m = 0; m < C[j][k].Count; m++)
+			//			{
+			//				if (C[j][k][m][i] >= C[maxProbIndex[0]][maxProbIndex[1]][maxProbIndex[2]][i])
+			//				{
+			//					maxProbIndex[0] = j;
+			//					maxProbIndex[1] = k;
+			//					maxProbIndex[2] = m;
+			//				}
+			//			}
+			//		}
+			//	}
+			//	nextPrices[i] = referenceHistories[0][maxProbIndex[1]][maxProbIndex[2]][0];
+			//}
+
+			// Convert percent to price, update, and return
+			for (int i = 0; i < nextPrices.Count; i++)
+			{
+				nextPrices[i] = (1.0f + nextPrices[i]) * predictedPrices.Last()[i];
+			}
+			predictedPrices.Add(nextPrices.ToArray());
+
+			return nextPrices;
+		}
+
+		/// <summary>
 		/// Populates this PredictionGenerator's predictions for an input number of time intervals
 		/// based on historical data collected on class construction. This method recursively adds
 		/// its new predictions to its own historical data during the generation, allowing indefinite
 		/// intervals of prediction.
 		/// </summary>
 		/// <param name="intervals"> Number of time intervals to predict. </param>
-		public void RecursiveGeneratePredictions(int intervals)
+		public void RecursiveGetPredictions(int intervals)
 		{
 			// Develop the predictions
 			for (int n = 0; n < intervals; n++)
 			{
 				List<List<Matrix>> C = GetC();
-				float norm = 0.0f;
 				Vector nextPrices = new Vector(predictedPrices.Last().Count());
 				for (int i = 0; i < C.Count; i++)
 				{
 					for (int j = 0; j < C[i].Count; j++)
 					{
-						nextPrices += (Matrix.Transpose(referenceHistories[0][j]) * C[i][j])[0];
-						norm++;
+						nextPrices += (1.0f / C[i].Count) * (Matrix.Transpose(referenceHistories[0][j]) * C[i][j])[0];
 					}
 				}
-				nextPrices = (1.0f / norm) * nextPrices;
+				nextPrices = (1.0f / C.Count) * nextPrices;
 				this.RemoveOldestData();
 				this.AddData(nextPrices);
 				for (int i = 0; i < nextPrices.Count; i++)
@@ -241,18 +293,19 @@ namespace TraderAI
 					// Normalize rows of C matrixes
 					for (int k = 0; k < C[i][j].Count; k++)
 					{
-						if (referenceHistories[i][j + 1][k].Magnitude != 0.0f)
+						float mag = referenceHistories[i][j + 1][k].Magnitude;
+						if (mag != 0.0f)
 						{
-							C[i][j][k] = (1.0f / referenceHistories[i][j + 1][k].Magnitude) * C[i][j][k];
+							C[i][j][k] = (1.0f / mag) * C[i][j][k];
 						}
 					}
 					// Unitize columns of C matrixes
-					C[i][j] = Matrix.Transpose(C[i][j]);
-					for (int k = 0; k < C[i][j].Count; k++)
-					{
-						C[i][j][k].Magnitude = 1.0f;
-					}
-					C[i][j] = Matrix.Transpose(C[i][j]);
+					//C[i][j] = Matrix.Transpose(C[i][j]);
+					//for (int k = 0; k < C[i][j].Count; k++)
+					//{
+					//	C[i][j][k].Magnitude = 1.0f;
+					//}
+					//C[i][j] = Matrix.Transpose(C[i][j]);
 				}
 			}
 			return C;

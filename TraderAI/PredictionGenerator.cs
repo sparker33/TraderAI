@@ -207,12 +207,18 @@ namespace TraderAI
 			// Weighted average method
 			for (int i = 0; i < C.Count; i++)
 			{
-				for (int j = 1; j < C[i].Count; j++)
+				for (int j = 0; j < C[i].Count; j++)
 				{
 					nextPrices += (1.0f / C[i].Count) * (Matrix.Transpose(referenceHistories[0][j]) * C[i][j])[0];
 				}
 			}
 			nextPrices = (1.0f / C.Count) * nextPrices;
+			// Cube root normalization
+			for (int i = 0; i < nextPrices.Count; i++)
+			{
+				nextPrices[i] = Math.Sign(nextPrices[i]) * (float)Math.Pow(Math.Abs(nextPrices[i]), 1.0 / 3.0);
+			}
+
 			// Max Likelihood method
 			//for (int i = 0; i < nextPrices.Count; i++)
 			//{
@@ -259,14 +265,44 @@ namespace TraderAI
 			{
 				List<List<Matrix>> C = GetC();
 				Vector nextPrices = new Vector(predictedPrices.Last().Count());
-				for (int i = 0; i < C.Count; i++)
+				//// Weighted average method
+				//for (int i = 0; i < C.Count; i++)
+				//{
+				//	for (int j = 0; j < C[i].Count; j++)
+				//	{
+				//		nextPrices += (1.0f / C[i].Count) * (Matrix.Transpose(referenceHistories[0][j]) * C[i][j])[0];
+				//	}
+				//}
+				//nextPrices = (1.0f / C.Count) * nextPrices;
+				//// Cube root normalization
+				//for (int i = 0; i < nextPrices.Count; i++)
+				//{
+				//	nextPrices[i] = Math.Sign(nextPrices[i]) * (float)Math.Pow(Math.Abs(nextPrices[i]), 1.0 / 3.0);
+				//}
+
+				// Max Likelihood method
+				for (int i = 0; i < nextPrices.Count; i++)
 				{
-					for (int j = 0; j < C[i].Count; j++)
+					int[] maxProbIndex = new int[3];
+					for (int j = 0; j < C.Count; j++)
 					{
-						nextPrices += (1.0f / C[i].Count) * (Matrix.Transpose(referenceHistories[0][j]) * C[i][j])[0];
+						for (int k = 0; k < C[j].Count; k++)
+						{
+							for (int m = 0; m < C[j][k].Count; m++)
+							{
+								if (C[j][k][m][i] >= C[maxProbIndex[0]][maxProbIndex[1]][maxProbIndex[2]][i])
+								{
+									maxProbIndex[0] = j;
+									maxProbIndex[1] = k;
+									maxProbIndex[2] = m;
+								}
+							}
+						}
 					}
+					nextPrices[i] = referenceHistories[0][maxProbIndex[1]][maxProbIndex[2]][0];
 				}
-				nextPrices = (1.0f / C.Count) * nextPrices;
+
+				// Update data and populate lists
 				this.RemoveOldestData();
 				this.AddData(nextPrices);
 				for (int i = 0; i < nextPrices.Count; i++)

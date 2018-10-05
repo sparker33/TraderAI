@@ -17,9 +17,7 @@ namespace TraderAI
         public static string DEFAULTDIRECTORY = "C:\\111\\Periphery";
 
         // Private fields
-        private string selectedFileName;
         private string outputFilePath;
-        private BackgroundWorker downloadBackgroundWorker = new BackgroundWorker();
 		private BackgroundWorker evolveBackgroundWorker = new BackgroundWorker();
 		private BackgroundWorker predictionBackgroundWorker = new BackgroundWorker();
 		private string stockDataPrintoutFile;
@@ -32,67 +30,10 @@ namespace TraderAI
         {
             InitializeComponent();
 
-            downloadBackgroundWorker.DoWork += new DoWorkEventHandler(donwloadWorker_DoWork);
-            downloadBackgroundWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(downloadWorker_RunWorkerCompleted);
 			evolveBackgroundWorker.DoWork += new DoWorkEventHandler(evolveWorker_DoWork);
 			evolveBackgroundWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(evolveWorker_RunWorkerCompleted);
 			predictionBackgroundWorker.DoWork += new DoWorkEventHandler(predictionWorker_DoWork);
 			predictionBackgroundWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(predictionWorker_RunWorkerCompleted);
-		}
-
-        // Event handler for browsebutton; gets file to read list of tickers to scrape data for
-        private void browseButton_Click(object sender, EventArgs e)
-        {
-            OpenFileDialog selectFileDialog = new OpenFileDialog();
-            if (DEFAULTDIRECTORY == String.Empty)
-            {
-                selectFileDialog.InitialDirectory = "C:\\";
-            }
-            else
-            {
-                selectFileDialog.InitialDirectory = DEFAULTDIRECTORY;
-            }
-            selectFileDialog.Filter = "csv files (*.csv)|*.csv|All files (*.*)|*.*";
-            selectFileDialog.FilterIndex = 1;
-
-            if (selectFileDialog.ShowDialog() == DialogResult.OK)
-            {
-                selectedFileName = selectFileDialog.FileName;
-                tickerListTextBox.Text = selectedFileName;
-                DEFAULTDIRECTORY = selectedFileName.Trim().Remove(selectedFileName.LastIndexOf(@"\"));
-                outputFilePath = DEFAULTDIRECTORY;
-
-                try
-                {
-                    using (FileStream stream = new FileStream(selectedFileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-                    {
-                        using (StreamReader reader = new StreamReader(stream))
-                        {
-                            string line = reader.ReadLine();
-                            string[] values = line.Split(',');
-                            exchangeColumnDropDown.Items.AddRange(values);
-                            tickerColumnDropDown.Items.AddRange(values);
-                        }
-                    }
-                }
-                catch (Exception)
-                {
-                    MessageBox.Show("Access file permission denied.");
-                }
-            }
-        }
-
-        // Method that runs when "Run" button is clicked
-        private void downloadButton_Click(object sender, EventArgs e)
-        {
-            StockDataDownloader downloader = new StockDataDownloader(selectedFileName,
-                exchangeColumnDropDown.SelectedIndex,
-                tickerColumnDropDown.SelectedIndex,
-                startDatePicker.Value,
-                endDatePicker.Value);
-            downloadButton.Enabled = false;
-
-            downloadBackgroundWorker.RunWorkerAsync(downloader);
 		}
 
 		// Method to handle clicking the Evolve button
@@ -100,8 +41,7 @@ namespace TraderAI
 		{
 			if (stockDataPrintoutFile == null)
 			{
-				System.Windows.Forms.MessageBox.Show("Invalid stock data file path. Please select a formatted " +
-					"stock data file or run the downloader to generate one.");
+				System.Windows.Forms.MessageBox.Show("Please select a formatted future stock data file.");
 				OpenFileDialog selectFileDialog = new OpenFileDialog();
 				if (DEFAULTDIRECTORY == String.Empty)
 				{
@@ -127,8 +67,7 @@ namespace TraderAI
 			}
 			if (trainingDataPrintoutFile == null)
 			{
-				System.Windows.Forms.MessageBox.Show("Invalid training data file path. Please select a formatted " +
-					"stock data file or run the downloader to generate one.");
+				System.Windows.Forms.MessageBox.Show("Please select a formatted stock training data file.");
 				OpenFileDialog selectFileDialog = new OpenFileDialog();
 				if (DEFAULTDIRECTORY == String.Empty)
 				{
@@ -164,8 +103,7 @@ namespace TraderAI
 		{
 			if (trainingDataPrintoutFile == null)
 			{
-				System.Windows.Forms.MessageBox.Show("Invalid training data file path. Please select a formatted " +
-					"stock data file or run the downloader to generate one.");
+				System.Windows.Forms.MessageBox.Show("Please select a formatted stock data training file.");
 				OpenFileDialog selectFileDialog = new OpenFileDialog();
 				if (DEFAULTDIRECTORY == String.Empty)
 				{
@@ -195,41 +133,7 @@ namespace TraderAI
 
 			predictionBackgroundWorker.RunWorkerAsync(predictor);
 		}
-
-		#region DonwloadBackgroundworkerInstructions
-		// Async DoWork function
-		private void donwloadWorker_DoWork(object sender, DoWorkEventArgs e)
-        {
-            BackgroundWorker worker = sender as BackgroundWorker;
-
-            e.Result = DownloadStockData((StockDataDownloader)e.Argument, worker);
-        }
-
-        // Async run completed function
-        private void downloadWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
-        {
-            if (e.Error != null)
-            {
-                MessageBox.Show(e.Error.Message);
-            }
-            else
-            {
-                MessageBox.Show("Completed Download");
-            }
-            downloadButton.Enabled = true;
-        }
-
-        // Async run helper function
-        public bool DownloadStockData(StockDataDownloader downloader, BackgroundWorker worker)
-        {
-            stockDataPrintoutFile = DEFAULTDIRECTORY + "\\StockData_" + DateTime.Now.Month.ToString() + "-" +
-                    DateTime.Now.Day.ToString() + "-" + DateTime.Now.Year.ToString() + "_" + DateTime.Now.Hour.ToString() +
-                    DateTime.Now.Minute.ToString() + DateTime.Now.Second.ToString() + DateTime.Now.Millisecond.ToString() + ".sdp";
-            downloader.WriteDataToCSV(stockDataPrintoutFile);
-            return true;
-        }
-		#endregion
-
+		
 		#region RunBackgroundworkerInstructions
 		// Async DoWork function
 		private void evolveWorker_DoWork(object sender, DoWorkEventArgs e)
@@ -306,5 +210,35 @@ namespace TraderAI
 			return true;
 		}
 		#endregion
+
+		private void dataFormatButton_Click(object sender, EventArgs e)
+		{
+			string selectedFolder;
+			System.Windows.Forms.MessageBox.Show("Please select a folder with raw stock data files.");
+			FolderBrowserDialog selectFolderDialog = new FolderBrowserDialog();
+			if (DEFAULTDIRECTORY == String.Empty)
+			{
+				selectFolderDialog.SelectedPath = "C:\\";
+			}
+			else
+			{
+				selectFolderDialog.SelectedPath = DEFAULTDIRECTORY;
+			}
+
+			if (selectFolderDialog.ShowDialog() == DialogResult.OK)
+			{
+				selectedFolder = selectFolderDialog.SelectedPath;
+				DEFAULTDIRECTORY = selectedFolder.Remove(selectedFolder.LastIndexOf(@"\"));
+				outputFilePath = DEFAULTDIRECTORY;
+			}
+			else
+			{
+				return;
+			}
+
+			StockDataDownloader dataFormatter = new StockDataDownloader(selectedFolder);
+			dataFormatter.WriteDataToCSV(outputFilePath + "\\RawData_" + DateTime.Now.Hour.ToString() + DateTime.Now.Minute.ToString() + ".sdp");
+			System.Windows.Forms.MessageBox.Show("Data formatting completed.");
+		}
 	}
 }

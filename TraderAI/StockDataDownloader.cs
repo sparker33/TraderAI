@@ -23,74 +23,84 @@ namespace TraderAI
         }
 
         // Class constructor with file and column heading inputs
-        // pulls data from google
-        public StockDataDownloader(string fileName, int exchangesHeaderIndex, int tickersHeaderIndex, DateTime startDate, DateTime endDate)
+        public StockDataDownloader(string folderName)
         {
+			string[] files = Directory.GetFiles(folderName, "*.csv", SearchOption.TopDirectoryOnly);
+			foreach (string file in files)
+			{
+				Dictionary<DateTime, StockDataItem> tempDict = new Dictionary<DateTime, StockDataItem>();
+				using (FileStream stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+				{
+					using (StreamReader reader = new StreamReader(stream))
+					{
+						string line;
+						string[] values;
+						while (!reader.EndOfStream)
+						{
+							line = reader.ReadLine();
+							values = line.Split(',');
+							StockDataItem stockDataItem = new StockDataItem();
+							stockDataItem.close = Single.Parse(values[5]);
+							stockDataItem.low = Single.Parse(values[4]);
+							stockDataItem.high = Single.Parse(values[3]);
+							stockDataItem.open = Single.Parse(values[2]);
+							stockDataItem.volume = Single.Parse(values[6]);
+							DateTime date = new DateTime(Int32.Parse(values[0].Remove(4)), Int32.Parse(values[0].Substring(4).Remove(2)), Int32.Parse(values[0].Substring(6)));
+							tempDict.Add(date, stockDataItem);
+						}
+						tickerSymbols.Add(file.Split('_')[1].Split('.')[0]);
+						stockDataDictionaries.Add(tempDict);
+					}
+				}
+			}
 
-            // Temporary placeholder to populate some stock data to work with (delete once auto scan is fixed)
-            tickerSymbols.Add("AMD");
-            tickerSymbols.Add("TUP");
+			// Populate orderedDates
+			using (FileStream stream = new FileStream(files[0], FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+			{
+				using (StreamReader reader = new StreamReader(stream))
+				{
+					string line;
+					string[] values;
+					//temp code
+					//int temp = 0;
+					//while (temp < 500 && !reader.EndOfStream)
+					//{
+					//	line = reader.ReadLine();
+					//	values = line.Split(',');
+						//DateTime date = new DateTime(Int32.Parse(values[0].Remove(4)), Int32.Parse(values[0].Substring(4).Remove(2)), Int32.Parse(values[0].Substring(6)));
+						//orderedDates.Add(date);
+					//	temp++;
+					//}
+					//end temp code
 
-            Dictionary<DateTime, StockDataItem> amdDict = new Dictionary<DateTime, StockDataItem>();
-            string[] amdLines = Properties.Resources.AMD.Split('\n');
-            for (int i = 1; i < amdLines.Length - 1; i++)
-            {
-                string[] values = amdLines[i].Split(',');
-                StockDataItem stockDataItem = new StockDataItem();
-                stockDataItem.close = Single.Parse(values[6]);
-                stockDataItem.low = Single.Parse(values[4]);
-                stockDataItem.high = Single.Parse(values[3]);
-                stockDataItem.open = Single.Parse(values[2]);
-                stockDataItem.volume = Single.Parse(values[7]);
-                amdDict.Add(DateTime.Parse(values[0]), stockDataItem);
-            }
-            stockDataDictionaries.Add(amdDict);
+					while (!reader.EndOfStream)
+					{
+						line = reader.ReadLine();
+						values = line.Split(',');
+						DateTime date = new DateTime(Int32.Parse(values[0].Remove(4)), Int32.Parse(values[0].Substring(4).Remove(2)), Int32.Parse(values[0].Substring(6)));
+						orderedDates.Add(date);
+					}
+				}
+			}
 
-            Dictionary<DateTime, StockDataItem> tupDict = new Dictionary<DateTime, StockDataItem>();
-            string[] tupLines = Properties.Resources.TUP.Split('\n');
-            for (int i = 1; i < tupLines.Length - 1; i++)
-            {
-                string[] values = tupLines[i].Split(',');
-                StockDataItem stockDataItem = new StockDataItem();
-                stockDataItem.close = Single.Parse(values[6]);
-                stockDataItem.low = Single.Parse(values[4]);
-                stockDataItem.high = Single.Parse(values[3]);
-                stockDataItem.open = Single.Parse(values[2]);
-                stockDataItem.volume = Single.Parse(values[7]);
-                tupDict.Add(DateTime.Parse(values[0]), stockDataItem);
-            }
-            stockDataDictionaries.Add(tupDict);
-            /*
-            This portion commented out until web-based stock data retrieval service is fixed 
-
-            // Retrieve data
-            WebClientForStockFinanceHistory downloaderClient = new WebClientForStockFinanceHistory();
-            using (FileStream stream = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-            {
-                using (StreamReader reader = new StreamReader(stream))
-                {
-                    string line = reader.ReadLine();
-                    string[] values;
-                    while (!reader.EndOfStream)
-                    {
-                        line = reader.ReadLine();
-                        values = line.Split(',');
-                        tickerSymbols.Add(values[tickersHeaderIndex]);
-                        stockDataDictionaries.Add(downloaderClient.getStockDataFromGoogle(values[exchangesHeaderIndex], tickerSymbols.Last(), startDate, endDate));
-                    }
-                }
-            }
-
-            */
-
-            // Populate orderedDates
-            DateTime dt = startDate;
-            while (dt <= endDate)
-            {
-                orderedDates.Add(dt);
-                dt = dt.AddDays(7);
-            }
-        }
+			// Remove extra data
+			for (int i = 0; i < orderedDates.Count; i++)
+			{
+				int j = 0;
+				while (j < tickerSymbols.Count)
+				{
+					if (!stockDataDictionaries[j].ContainsKey(orderedDates[i]))
+					{
+						tickerSymbols.RemoveAt(j);
+						stockDataDictionaries.RemoveAt(j);
+					}
+					else
+					{
+						j++;
+					}
+				}
+			}
+		}
         
         // Method enabling data writeout to csv
         public void WriteDataToCSV(string path)

@@ -265,7 +265,7 @@ namespace TraderAI
 			{
 				List<List<Matrix>> C = GetC();
 				Vector nextPrices = new Vector(predictedPrices.Last().Count());
-				//// Weighted average method
+				/* Weighted Average method */
 				//for (int i = 0; i < C.Count; i++)
 				//{
 				//	for (int j = 0; j < C[i].Count; j++)
@@ -279,8 +279,9 @@ namespace TraderAI
 				//{
 				//	nextPrices[i] = Math.Sign(nextPrices[i]) * (float)Math.Pow(Math.Abs(nextPrices[i]), 1.0 / 3.0);
 				//}
+				/* End Weighted Average method */
 
-				// Max Likelihood method
+				/* Max Likelihood method */
 				for (int i = 0; i < nextPrices.Count; i++)
 				{
 					int[] maxProbIndex = new int[3];
@@ -301,6 +302,7 @@ namespace TraderAI
 					}
 					nextPrices[i] = referenceHistories[0][maxProbIndex[1]][maxProbIndex[2]][0];
 				}
+				/* End Max Likelihood method */
 
 				// Update data and populate lists
 				this.RemoveOldestData();

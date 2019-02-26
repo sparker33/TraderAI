@@ -33,7 +33,7 @@ namespace TraderAI
 				{
 					using (StreamReader reader = new StreamReader(stream))
 					{
-						string line;
+						string line = reader.ReadLine();
 						string[] values;
 						while (!reader.EndOfStream)
 						{
@@ -45,10 +45,12 @@ namespace TraderAI
 							stockDataItem.high = Single.Parse(values[3]);
 							stockDataItem.open = Single.Parse(values[2]);
 							stockDataItem.volume = Single.Parse(values[6]);
-							DateTime date = new DateTime(Int32.Parse(values[0].Remove(4)), Int32.Parse(values[0].Substring(4).Remove(2)), Int32.Parse(values[0].Substring(6)));
+							//DateTime date = new DateTime(Int32.Parse(values[0].Remove(4)), Int32.Parse(values[0].Substring(4).Remove(2)), Int32.Parse(values[0].Substring(6)));
+							DateTime date = DateTime.Parse(values[0]);
 							tempDict.Add(date, stockDataItem);
 						}
-						tickerSymbols.Add(file.Split('_')[1].Split('.')[0]);
+						//tickerSymbols.Add(file.Split('_')[1].Split('.')[0]);
+						tickerSymbols.Add(file.Split('\\').Last().Split('.')[0]);
 						stockDataDictionaries.Add(tempDict);
 					}
 				}
@@ -59,9 +61,9 @@ namespace TraderAI
 			{
 				using (StreamReader reader = new StreamReader(stream))
 				{
-					string line;
+					string line = reader.ReadLine();
 					string[] values;
-					//temp code
+					//temp code for generating file with only first 500 data entries
 					//int temp = 0;
 					//while (temp < 500 && !reader.EndOfStream)
 					//{
@@ -77,7 +79,8 @@ namespace TraderAI
 					{
 						line = reader.ReadLine();
 						values = line.Split(',');
-						DateTime date = new DateTime(Int32.Parse(values[0].Remove(4)), Int32.Parse(values[0].Substring(4).Remove(2)), Int32.Parse(values[0].Substring(6)));
+						//DateTime date = new DateTime(Int32.Parse(values[0].Remove(4)), Int32.Parse(values[0].Substring(4).Remove(2)), Int32.Parse(values[0].Substring(6)));
+						DateTime date = DateTime.Parse(values[0]);
 						orderedDates.Add(date);
 					}
 				}
